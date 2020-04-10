@@ -1,6 +1,7 @@
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const config = require('../config');
 
-const client = new Client(config);
-const connection = client.connect();
+const pool = new Pool(config);
+const connection = pool.connect();
+
 module.exports = connection;
