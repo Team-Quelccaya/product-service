@@ -18,7 +18,12 @@ module.exports = {
     pool
       .query(infoText, value)
       .then((res) => {
-        product = res.rows[0];
+        let result = res.rows[0];
+        if (result.hasOwnProperty('product_id')) {
+          result['id'] = Number(result.product_id);
+          delete result.product_id;
+        }
+        product = result;
       })
       .then(() => pool.query(featureText, value))
       .then((res) => {
@@ -52,8 +57,6 @@ module.exports = {
       FROM skus 
       WHERE style_id = $1`;
     const stylesValue = [id];
-    let photosValue;
-    let skusValue;
 
     let response = { product_id: id.toString(), results: [] };
 
@@ -68,6 +71,7 @@ module.exports = {
             style['default?'] = style.default_style;
             delete style.default_style;
           }
+          if (style.sale_price === 'null') style.sale_price = '0';
           return style;
         });
         var photoPromises = styles.map((style) => {

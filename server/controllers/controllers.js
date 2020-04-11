@@ -13,6 +13,7 @@ module.exports = {
     });
   },
   getProductInfo: (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     model.getProductInfo(req.params.product_id, (err, results) => {
       if (err) {
         console.error(err);
@@ -24,6 +25,7 @@ module.exports = {
     });
   },
   getProductStyles: (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     model.getProductStyles(req.params.product_id, (err, results) => {
       if (err) {
         console.error(err);
@@ -35,6 +37,7 @@ module.exports = {
     });
   },
   getRelatedProducts: (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     model.getRelatedProducts(req.params.product_id, (err, results) => {
       if (err) {
         console.error(err);
