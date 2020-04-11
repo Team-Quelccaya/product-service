@@ -23,12 +23,77 @@ module.exports = {
       });
   },
   getProductStyles: (id, cb) => {
-    const stylesText = 'SELECT * FROM styles WHERE product_id = $1';
-    const photosText = 'SELECT * FROM photos WHERE url = $1';
-    const skusText = 'SELECT * FROM skus WHERE style_id = $1';
+    const stylesText = `
+      SELECT
+        style_id,
+        name,
+        original_price,
+        sale_price,
+        default_style 
+      FROM styles
+      WHERE product_id = $1`;
+    const photosText =
+      'SELECT url, thumbnail_url FROM photos WHERE style_id = $1';
+    const skusText = 'SELECT size, quantity FROM skus WHERE style_id = $1';
     const stylesValue = [id];
-    const photosValue = [];
-    const skusValue = [];
+    let photosValue;
+    let skusValue;
+
+    let response = { product_id: id.toString(), results: [] };
+
+    var styles = [];
+
+    pool
+      .query(stylesText, stylesValue)
+      .then((res) => {
+        styles = res.rows.map((style) => {
+          style.style_id = Number(style.style_id);
+          if (style.hasOwnProperty('default_style')) {
+            style['default?'] = style.default_style;
+            delete style.default_style;
+          }
+          return style;
+        });
+        var photoPromises = styles.map((style) => {
+          return pool.query(photosText, [style.style_id]);
+        });
+
+        return Promise.all(photoPromises);
+      })
+      .then((photosResults) => {
+        var photos = photosResults.map((result) => result.rows);
+        styles = styles.map((style, index) => {
+          style.photos = photos[index].map((photo) => {
+            return {
+              thumbnail_url: photo.thumbnail_url.replace(/\"/g, ''),
+              url: photo.url.replace(/\"/g, ''),
+            };
+          });
+          return style;
+        });
+
+        var skusPromises = styles.map((style) => {
+          return pool.query(skusText, [style.style_id]);
+        });
+
+        return Promise.all(skusPromises);
+      })
+      .then((skusResults) => {
+        var skus = skusResults.map((result) => result.rows);
+        styles = styles.map((style, index) => {
+          style.skus = skus[index].reduce((prev, sku) => {
+            prev[sku.size] = sku.quantity;
+            return prev;
+          }, {});
+          return style;
+        });
+        response.results = styles;
+        console.log(response);
+        cb(null, response);
+      })
+      .catch((err) => {
+        cb(err);
+      });
   },
   getRelatedProducts: (id, cb) => {
     const text = 'SELECT * FROM related WHERE current_product_id = $1';
