@@ -60,7 +60,7 @@ module.exports = {
 
     let response = { product_id: id.toString(), results: [] };
 
-    var styles = [];
+    let styles = [];
 
     pool
       .query(stylesText, stylesValue)
@@ -74,14 +74,14 @@ module.exports = {
           if (style.sale_price === 'null') style.sale_price = '0';
           return style;
         });
-        var photoPromises = styles.map((style) => {
+        let photoPromises = styles.map((style) => {
           return pool.query(photosText, [style.style_id]);
         });
 
         return Promise.all(photoPromises);
       })
       .then((photosResults) => {
-        var photos = photosResults.map((result) => result.rows);
+        let photos = photosResults.map((result) => result.rows);
         styles = styles.map((style, index) => {
           style.photos = photos[index].map((photo) => {
             return {
@@ -92,14 +92,14 @@ module.exports = {
           return style;
         });
 
-        var skusPromises = styles.map((style) => {
+        let skusPromises = styles.map((style) => {
           return pool.query(skusText, [style.style_id]);
         });
 
         return Promise.all(skusPromises);
       })
       .then((skusResults) => {
-        var skus = skusResults.map((result) => result.rows);
+        let skus = skusResults.map((result) => result.rows);
         styles = styles.map((style, index) => {
           style.skus = skus[index].reduce((prev, sku) => {
             prev[sku.size] = sku.quantity;
