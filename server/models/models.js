@@ -2,9 +2,16 @@ const pool = require('../../db');
 
 module.exports = {
   getProductInfo: (id, cb) => {
-    const infoText = 'SELECT * FROM product WHERE product_id = $1';
-    const featureText =
-      'SELECT feature, value FROM features WHERE product_id = $1';
+    const infoText = `
+      SELECT 
+        * 
+      FROM product 
+      WHERE product_id = $1`;
+    const featureText = `
+      SELECT 
+        feature, value 
+      FROM features 
+      WHERE product_id = $1`;
     const value = [id];
     let product;
 
@@ -32,9 +39,18 @@ module.exports = {
         default_style 
       FROM styles
       WHERE product_id = $1`;
-    const photosText =
-      'SELECT url, thumbnail_url FROM photos WHERE style_id = $1';
-    const skusText = 'SELECT size, quantity FROM skus WHERE style_id = $1';
+    const photosText = `
+      SELECT 
+        url, 
+        thumbnail_url 
+      FROM photos 
+      WHERE style_id = $1`;
+    const skusText = `
+      SELECT 
+        size, 
+        quantity 
+      FROM skus 
+      WHERE style_id = $1`;
     const stylesValue = [id];
     let photosValue;
     let skusValue;
@@ -65,8 +81,8 @@ module.exports = {
         styles = styles.map((style, index) => {
           style.photos = photos[index].map((photo) => {
             return {
-              thumbnail_url: photo.thumbnail_url.replace(/\"/g, ''),
-              url: photo.url.replace(/\"/g, ''),
+              thumbnail_url: photo.thumbnail_url,
+              url: photo.url,
             };
           });
           return style;
@@ -96,7 +112,11 @@ module.exports = {
       });
   },
   getRelatedProducts: (id, cb) => {
-    const text = 'SELECT * FROM related WHERE current_product_id = $1';
+    const text = `
+    SELECT 
+      * 
+    FROM related 
+    WHERE current_product_id = $1`;
     const value = [id];
     pool
       .query(text, value)
