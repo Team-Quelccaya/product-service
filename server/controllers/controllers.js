@@ -2,7 +2,7 @@ const model = require('../models/models.js');
 
 module.exports = {
   getListProducts: (req, res) => {
-    model.getListProducts(req.params.id, (err, results) => {
+    model.getListProducts(req.query, (err, results) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -13,7 +13,7 @@ module.exports = {
     });
   },
   getProductInfo: (req, res) => {
-    model.getProductInfo(req.params.id, (err, results) => {
+    model.getProductInfo(req.params.product_id, (err, results) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -24,7 +24,7 @@ module.exports = {
     });
   },
   getProductStyles: (req, res) => {
-    model.getProductInfo(req.params.id, (err, results) => {
+    model.getProductStyles(req.params.product_id, (err, results) => {
       if (err) {
         console.error(err);
         res.sendStatus(500);
@@ -35,15 +35,14 @@ module.exports = {
     });
   },
   getRelatedProducts: (req, res) => {
-    model.getProductInfo(req.params.id),
-      (err, results) => {
-        if (err) {
-          console.error(err);
-          res.sendStatus(500);
-        } else {
-          console.log(results);
-          res.send(results);
-        }
-      };
+    model.getRelatedProducts(req.params.product_id, (err, results) => {
+      if (err) {
+        console.error(err);
+        res.sendStatus(500);
+      } else {
+        console.log(results);
+        res.send(results);
+      }
+    });
   },
 };
