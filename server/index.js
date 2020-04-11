@@ -4,7 +4,7 @@ const app = express();
 const routes = require('../server/routes/routes.js');
 
 app.use(bodyParser.json());
-app.get('/', (req, res) => res.send('Hello World!'));
+app.get('/', (req, res) => res.send('Please specify routes'));
 app.use('/', routes);
 
 app.listen(3000, function () {

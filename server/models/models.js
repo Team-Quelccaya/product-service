@@ -13,18 +13,22 @@ module.exports = {
       .then((res) => {
         product = res.rows[0];
       })
-      .then(() => {
-        pool
-          .query(featureText, value)
-          .then((res) => {
-            product.features = res.rows;
-          })
-          .then(() => cb(null, product))
-          .catch((err) => cb(err));
+      .then(() => pool.query(featureText, value))
+      .then((res) => {
+        product.features = res.rows;
       })
+      .then(() => cb(null, product))
       .catch((err) => {
         cb(err);
       });
+  },
+  getProductStyles: (id, cb) => {
+    const stylesText = 'SELECT * FROM styles WHERE product_id = $1';
+    const photosText = 'SELECT * FROM photos WHERE url = $1';
+    const skusText = 'SELECT * FROM skus WHERE style_id = $1';
+    const stylesValue = [id];
+    const photosValue = [];
+    const skusValue = [];
   },
   getRelatedProducts: (id, cb) => {
     const text = 'SELECT * FROM related WHERE current_product_id = $1';
