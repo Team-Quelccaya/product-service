@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const routes = require('../server/routes/routes.js');
+const routes = require('./routes/routes.js');
 
 app.use(bodyParser.json());
 app.get('/', (req, res) => res.send('Please specify routes'));
