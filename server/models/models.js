@@ -33,7 +33,6 @@ module.exports = {
       .catch((err) => {
         cb(err);
       });
-    console.log('product_info_queried');
   },
   getProductStyles: (id, cb) => {
     const text = `
@@ -61,7 +60,6 @@ module.exports = {
     let storage = {};
     let photos = [];
     let photo = {};
-
     pool
       .query(text, value)
       .then((res) => {
@@ -123,7 +121,6 @@ module.exports = {
         cb(null, response);
       })
       .catch((err) => cb(err));
-    console.log('product_styles_queried');
   },
   getRelatedProducts: (id, cb) => {
     const text = `
@@ -141,6 +138,5 @@ module.exports = {
         cb(null, result);
       })
       .catch((err) => cb(err));
-    console.log('related_product_queried');
   },
 };
