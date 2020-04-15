@@ -35,85 +35,92 @@ module.exports = {
       });
   },
   getProductStyles: (id, cb) => {
-    const stylesText = `
-      SELECT
-        style_id,
-        name,
-        original_price,
-        sale_price,
-        default_style 
-      FROM styles
-      WHERE product_id = $1`;
-    const photosText = `
-      SELECT 
-        url, 
-        thumbnail_url 
-      FROM photos 
-      WHERE style_id = $1`;
-    const skusText = `
-      SELECT 
-        size, 
-        quantity 
-      FROM skus 
-      WHERE style_id = $1`;
-    const stylesValue = [id];
-
+    const text = `
+    SELECT 
+      s.product_id, 
+      s.style_id, 
+      s.name, 
+      s.original_price, 
+      s.sale_price, 
+      s.default_style, 
+      f.photo_id, 
+      f.thumbnail_url, 
+      f.url, 
+      k.sku_id, 
+      k.size, 
+      k.quantity
+    FROM styles s
+    JOIN photos f
+    ON s.style_id = f.style_id
+    JOIN skus k
+    ON s.style_id = k.style_id
+    WHERE s.product_id= $1`;
+    const value = [id];
     let response = { product_id: id.toString(), results: [] };
-
-    var styles = [];
-
+    let storage = {};
+    let photos = [];
+    let photo = {};
     pool
-      .query(stylesText, stylesValue)
+      .query(text, value)
       .then((res) => {
-        styles = res.rows.map((style) => {
-          style.style_id = Number(style.style_id);
-          if (style.hasOwnProperty('default_style')) {
-            style['default?'] = style.default_style;
-            delete style.default_style;
+        res.rows.map((row) => {
+          if (storage.style_id === undefined) {
+            storage.style_id = row.style_id;
+            storage.name = row.name;
+            storage.original_price = row.original_price;
+            if (row.sale_price === 'null') {
+              storage.sale_price = '0';
+            } else {
+              storage.sale_price = row.sale_price;
+            }
+            storage['default?'] = row.default_style;
+            storage.skus = {};
+            storage.skus[row.size] = row.quantity;
+            photo.photo_id = row.photo_id;
+            photo.url = row.url;
+            photo.thumbnail_url = row.thumbnail_url;
           }
-          if (style.sale_price === 'null') style.sale_price = '0';
-          return style;
-        });
-        var photoPromises = styles.map((style) => {
-          return pool.query(photosText, [style.style_id]);
-        });
 
-        return Promise.all(photoPromises);
+          if (
+            storage.style_id !== undefined &&
+            storage.style_id !== row.style_id
+          ) {
+            storage.style_id = Number(storage.style_id);
+            storage.photos = photos;
+            response.results.push(storage);
+            storage = {};
+            photos = [];
+            photo = {};
+            storage.style_id = row.style_id;
+            storage.name = row.name;
+            storage.orginal_price = row.orginal_price;
+            if (row.sale_price === 'null') {
+              storage.sale_price = '0';
+            } else {
+              storage.sale_price = row.sale_price;
+            }
+            storage['default?'] = row.default_style;
+            storage.skus = {};
+            storage.skus[row.size] = row.quantity;
+          }
+
+          if (photo.photo_id !== row.photo_id) {
+            photo.photo_id = row.photo_id;
+            photo.url = row.url;
+            photo.thumbnail_url = row.thumbnail_url;
+            let result = { url: photo.url, thumbnail_url: photo.thumbnail_url };
+            photos.push(result);
+          }
+
+          if (storage.style_id === row.style_id) {
+            storage.skus[row.size] = row.quantity;
+          }
+        });
       })
-      .then((photosResults) => {
-        var photos = photosResults.map((result) => result.rows);
-        styles = styles.map((style, index) => {
-          style.photos = photos[index].map((photo) => {
-            return {
-              thumbnail_url: photo.thumbnail_url,
-              url: photo.url,
-            };
-          });
-          return style;
-        });
-
-        var skusPromises = styles.map((style) => {
-          return pool.query(skusText, [style.style_id]);
-        });
-
-        return Promise.all(skusPromises);
-      })
-      .then((skusResults) => {
-        var skus = skusResults.map((result) => result.rows);
-        styles = styles.map((style, index) => {
-          style.skus = skus[index].reduce((prev, sku) => {
-            prev[sku.size] = sku.quantity;
-            return prev;
-          }, {});
-          return style;
-        });
-        response.results = styles;
-        console.log(response);
+      .then(() => {
         cb(null, response);
       })
-      .catch((err) => {
-        cb(err);
-      });
+      .catch((err) => cb(err));
   },
   getRelatedProducts: (id, cb) => {
     const text = `
@@ -130,6 +137,6 @@ module.exports = {
         });
         cb(null, result);
       })
-      .catch((err) => cb(err, null));
+      .catch((err) => cb(err));
   },
 };
