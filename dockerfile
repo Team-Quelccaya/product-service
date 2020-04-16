@@ -6,4 +6,4 @@ RUN npm install
 COPY . .
 
 EXPOSE 4000
-CMD ["node", "/usr/src/app/server/index.js"]
+CMD ["npm", "start"]
