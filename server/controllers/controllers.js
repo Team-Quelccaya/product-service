@@ -7,6 +7,7 @@ module.exports = {
         console.error(err);
         res.sendStatus(500);
       } else {
+        console.log('reached');
         res.send(results);
       }
     });
@@ -18,6 +19,7 @@ module.exports = {
         console.error(err);
         res.sendStatus(500);
       } else {
+        console.log('reached');
         res.send(results);
       }
     });
@@ -29,6 +31,7 @@ module.exports = {
         console.error(err);
         res.sendStatus(500);
       } else {
+        console.log('reached');
         res.send(results);
       }
     });
@@ -40,6 +43,7 @@ module.exports = {
         console.error(err);
         res.sendStatus(500);
       } else {
+        console.log('reached');
         res.send(results);
       }
     });
